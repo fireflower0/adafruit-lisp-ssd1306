@@ -1,5 +1,6 @@
 (defpackage #:adafruit-lisp-ssd1306/i2c
   (:use #:cl
+        #:adafruit-lisp-ssd1306/8x8-font
         #:adafruit-lisp-ssd1306/wrapper/wiringpi)
   (:export :+black+
            :+white+
