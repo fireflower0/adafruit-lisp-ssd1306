@@ -11,5 +11,5 @@ exec ros -Q -- $0 "$@"
 (ql:quickload '(:ssd1306-i2c) :silent t)
 
 (defun main (&rest argv)
-  (format t "Program Start! (Exit with C-c) ~%")
+  (format t "Program Start!~%")
   (ssd1306-i2c:start argv))
