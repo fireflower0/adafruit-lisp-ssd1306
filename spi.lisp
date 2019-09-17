@@ -123,3 +123,27 @@
   (command +ssd1306-display-all-on-resume+)
   (command +ssd1306-normal-display+)
   (command +ssd1306-display-on+))
+
+(defun ssd1306-clear ()
+  (fill *buffer* 0))
+
+(defun ssd1306-set-contrast (contrast)
+  (when (or (< contrast 0) (> contrast 255))
+    (error "Contrast must be a value from 0 to 255"))
+  (command +ssd1306-set-contrast+)
+  (command contrast))
+
+(defun ssd1306-display ()
+  (command +ssd1306-column-addr+)
+  (command 0)             ; Column start address (0 = reset)
+  (command (- *width* 1)) ; Column end address
+  (command +ssd1306-page-addr+)
+  (command 0)             ; Page start address (0 = reset)
+  (command (- *pages* 1)) ; Page end address
+  (do ((i 0 (+ i 16)))
+      ((= i (length *buffer*)))
+    (write-list #'data (subseq *buffer* i (+ i 16)))))
+
+(defun ssd1306-clear-display ()
+  (ssd1306-clear)
+  (ssd1306-display))
