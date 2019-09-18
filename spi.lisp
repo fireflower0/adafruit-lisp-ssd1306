@@ -83,11 +83,11 @@
   (spi-data-rw *spi-cs* (list (logand +ctrl-reg+ +write+) value)))
 
 (defun command (value)
-  (pin-mode *dc* +low+)
+  (digital-write *dc* +low+)
   (spi-write value))
 
 (defun data (value)
-  (pin-mode *dc* +high+)
+  (digital-write *dc* +high+)
   (spi-write value))
 
 (defun write-list (func data)
