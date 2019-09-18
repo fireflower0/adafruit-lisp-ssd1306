@@ -67,7 +67,7 @@
 (defconstant +write+    #X3F)
 
 (defconstant +high+ 1)
-(defconstant +low   0)
+(defconstant +low+  0)
 
 (defun spi-data-rw (channel data &optional (len (length data)))
   (let ((mp (cffi:foreign-alloc :unsigned-char
@@ -80,7 +80,7 @@
       rval)))
 
 (defun spi-write (value)
-  (spi-data-rw +spi-cs+ (list (logand +ctrl-reg+ +write+) value)))
+  (spi-data-rw *spi-cs* (list (logand +ctrl-reg+ +write+) value)))
 
 (defun command (value)
   (pin-mode *dc* +low+)
@@ -90,7 +90,15 @@
   (pin-mode *dc* +high+)
   (spi-write value))
 
+(defun write-list (func data)
+  (dotimes (n (length data))
+    (funcall func (aref data n))))
+
 (defun ssd1306-init (&optional (vcc-state +ssd1306-switch-cap-vcc+))
+  (wiringpi-setup-gpio)
+  (pin-mode *dc* +output+)
+  (pin-mode *rst* +output+)
+  (wiringpi-spi-setup *spi-cs* *spi-speed*)
   (setf *vcc-state* vcc-state)
   (command +ssd1306-display-off+)
   (command +ssd1306-set-display-clock-div+)
@@ -147,3 +155,18 @@
 (defun ssd1306-clear-display ()
   (ssd1306-clear)
   (ssd1306-display))
+
+(defun ssd1306-draw-pixel (x y &key (color +white+))
+  (when (or (< x 0) (> x 127))
+    (error "x must be a value from 0 to 127"))
+  (when (or (< y 0) (> y 64))
+    (error "y must be a value from 0 to 63"))
+  (let ((index (+ x (* (floor y *pages*) *width*)))
+        (value (ash 1 (rem y 8))))
+    (setf (aref *buffer* index)
+          (cond ((= color +white+)
+                 (logior (aref *buffer* index) value))
+                ((= color +black+)
+                 (logand (aref *buffer* index) (lognot value)))
+                ((= color +inverse+)
+                 (logxor (aref *buffer* index) value))))))
