@@ -79,16 +79,13 @@
       (cffi:foreign-free mp)
       rval)))
 
-(defun spi-write (value)
-  (spi-data-rw *spi-cs* (list (logand +ctrl-reg+ +write+) value)))
-
-(defun command (value)
+(defun command (data)
   (digital-write *dc* +low+)
-  (spi-write value))
+  (spi-data-rw *spi-cs* (list data)))
 
-(defun data (value)
+(defun data (data)
   (digital-write *dc* +high+)
-  (spi-write value))
+  (spi-data-rw *spi-cs* (list data)))
 
 (defun write-list (func data)
   (dotimes (n (length data))
@@ -99,7 +96,9 @@
   (pin-mode *dc* +output+)
   (pin-mode *rst* +output+)
   (wiringpi-spi-setup *spi-cs* *spi-speed*)
+
   (setf *vcc-state* vcc-state)
+
   (command +ssd1306-display-off+)
   (command +ssd1306-set-display-clock-div+)
   (command #X80) ; the suggested ratio
