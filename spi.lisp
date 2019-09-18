@@ -81,11 +81,11 @@
 
 (defun command (data)
   (digital-write *dc* +low+)
-  (spi-data-rw *spi-cs* (list data)))
+  (spi-data-rw *spi-ch* (list data)))
 
 (defun data (data)
   (digital-write *dc* +high+)
-  (spi-data-rw *spi-cs* (list data)))
+  (spi-data-rw *spi-ch* (list data)))
 
 (defun write-list (func data)
   (dotimes (n (length data))
@@ -95,7 +95,7 @@
   (wiringpi-setup-gpio)
   (pin-mode *dc* +output+)
   (pin-mode *rst* +output+)
-  (wiringpi-spi-setup *spi-cs* *spi-speed*)
+  (wiringpi-spi-setup *spi-ch* *spi-speed*)
 
   (setf *vcc-state* vcc-state)
 
