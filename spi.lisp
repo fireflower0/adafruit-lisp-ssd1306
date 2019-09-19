@@ -12,18 +12,11 @@
 (defparameter *pages*  (/ *height* 8))
 (defparameter *buffer* (make-array `(,(* *width* *pages*))
                                    :initial-element 0))
-(defparameter *vcc-state* 0)
-
 ;; SPI
 (defparameter *rst* 23)
 (defparameter *dc* 4)
-(defparameter *spi-ch* 0)
 (defparameter *spi-cs* 1)
 (defparameter *spi-speed* 8000000)
-
-(defconstant +ctrl-reg+ #X20)
-(defconstant +read+     #X80)
-(defconstant +write+    #X3F)
 
 (defun spi-data-rw (channel data &optional (len (length data)))
   (let ((mp (cffi:foreign-alloc :unsigned-char
@@ -37,11 +30,11 @@
 
 (defun command (data)
   (digital-write *dc* +low+)
-  (spi-data-rw *spi-ch* (list data)))
+  (spi-data-rw *spi-cs* (list data)))
 
 (defun data (data)
   (digital-write *dc* +high+)
-  (spi-data-rw *spi-ch* (list data)))
+  (spi-data-rw *spi-cs* (list data)))
 
 (defun write-list (func data)
   (dotimes (n (length data))
@@ -51,9 +44,11 @@
   (wiringpi-setup-gpio)
   (pin-mode *dc* +output+)
   (pin-mode *rst* +output+)
-  (wiringpi-spi-setup *spi-ch* *spi-speed*)
+  (wiringpi-spi-setup *spi-cs* *spi-speed*)
 
-  (setf *vcc-state* vcc-state)
+  (digital-write *rst* +low+)
+  (delay 50)
+  (digital-write *rst* +high+)
 
   (command +ssd1306-display-off+)
   (command +ssd1306-set-display-clock-div+)

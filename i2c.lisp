@@ -30,7 +30,6 @@
 (defparameter *pages*  (/ *height* 8))
 (defparameter *buffer* (make-array `(,(* *width* *pages*))
                                    :initial-element 0))
-(defparameter *vcc-state* 0)
 
 ;; File Descriptor
 (defparameter *fd* (wiringpi-i2c-setup +ssd1306-i2c-address+))
@@ -68,7 +67,6 @@
     (funcall func (aref data n))))
 
 (defun ssd1306-init (&optional (vcc-state +ssd1306-switch-cap-vcc+))
-  (setf *vcc-state* vcc-state)
   (command +ssd1306-display-off+)
   (command +ssd1306-set-display-clock-div+)
   (command #X80) ; the suggested ratio
