@@ -56,8 +56,7 @@
                        (vcc-state +ssd1306-switch-cap-vcc+))
   ;; Set a Chip Select Number and a Data/Command Pin
   (setf *cs* chip-select
-        *dc* data-command
-        *rst* reset)
+        *dc* data-command)
 
   ;; Setup GPIO
   (wiringpi-setup-gpio)
