@@ -33,6 +33,11 @@
   (digital-write *dc* +high+)
   (spi-data-rw *cs* data))
 
+;; 主要パーツすぐに試せるボードのSSD1306の場合
+;; cs    : 1
+;; speed : 8000000
+;; dc    : 4
+;; rst   : 23
 (defun ssd1306-init (cs speed dc rst
                      &optional (vcc-state +ssd1306-switch-cap-vcc+))
   ;; Set a Chip Select Number and a Data/Command Pin
@@ -61,7 +66,7 @@
              #X00 ; no offset
              ,(logior ,+ssd1306-set-start-line+ #X00)
              ,+ssd1306-charge-pump+
-             #X14
+             ,(if (= vcc-state +ssd1306-external-vcc+) #X10 #X14)
              ,+ssd1306-memory-mode+
              #X00
              ,(logior ,+ssd1306-seg-remap+ #X01)
@@ -69,9 +74,9 @@
              ,+ssd1306-set-com-pins+
              #X12
              ,+ssd1306-set-contrast+
-             #XCF
+             ,(if (= vcc-state +ssd1306-external-vcc+) #X9F #XCF)
              ,+ssd1306-set-pre-charge+
-             #XF1
+             ,(if (= vcc-state +ssd1306-external-vcc+) #X22 #XF1)
              ,+ssd1306-set-vcom-detect+
              #X40
              ,+ssd1306-display-all-on-resume+
