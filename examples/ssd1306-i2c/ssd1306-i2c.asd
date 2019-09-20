@@ -6,7 +6,6 @@
   :description ""
   :depends-on ("cffi"
                "ssd1306-i2c/boot"
-               "cl-syntax-annot"
-               "adafruit-lisp-ssd1306"))
+               "cl-syntax-annot"))
 
 (register-system-packages "ssd1306-i2c/boot" '(#:ssd1306-i2c))

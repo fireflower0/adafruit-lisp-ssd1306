@@ -1,5 +1,6 @@
 (uiop:define-package #:ssd1306-i2c/app
   (:use #:cl
+        #:adafruit-lisp-ssd1306/constants  
         #:ssd1306-i2c/wrapper/wiringpi
         #:adafruit-lisp-ssd1306/i2c)
   (:export #:main))
@@ -61,7 +62,7 @@
   (ssd1306-clear-display))
 
 (defun example-draw-bmp ()
-  (ssd1306-draw-bmp #P"qrcode.bmp")
+  (ssd1306-draw-bmp #P"~/.roswell/local-projects/fireflower0/cl-raspi/examples/cl-raspi-url.bmp")
   (ssd1306-draw-string 62  8 "cl-raspi")
   (ssd1306-draw-string 62 16 "Github")
   (ssd1306-draw-string 62 24 "URL")
