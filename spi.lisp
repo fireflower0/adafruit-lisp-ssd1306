@@ -246,7 +246,9 @@
     (ssd1306-draw-line x0 (+ y0 n) (+ x2 n) (- y2 n) :color color)))
 
 (defun ssd1306-invert-display (flg)
-  (command (if flg +ssd1306-invert-display+ +ssd1306-normal-display+)))
+  (command (if flg
+               `(,+ssd1306-invert-display+)
+               `(,+ssd1306-normal-display+))))
 
 (defun ssd1306-draw-char (x y char &key (fill nil))
   (let ((index (- (char-code char) #X20))

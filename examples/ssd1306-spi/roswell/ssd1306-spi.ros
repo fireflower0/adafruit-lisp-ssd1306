@@ -1,0 +1,15 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+
+(uiop:define-package #:ssd1306-spi/roswell/ssd1306-spi.ros
+  (:use #:cl))
+(in-package #:ssd1306-spi/roswell/ssd1306-spi.ros)
+
+(ql:quickload '(:ssd1306-spi) :silent t)
+
+(defun main (&rest argv)
+  (format t "Program Start! (Exit with C-c) ~%")
+  (ssd1306-spi:start argv))
