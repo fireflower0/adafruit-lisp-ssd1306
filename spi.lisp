@@ -27,8 +27,9 @@
 (defparameter *pages*  (/ *height* 8))
 (defparameter *buffer* (make-list (* *width* *pages*)
                                   :initial-element 0))
-(defparameter *dc* 0) ; Data(high:1)/Command(low:0)
-(defparameter *cs* 0) ; Chip Select (0 or 1)
+(defparameter *rst-pin* 0) ; Reset
+(defparameter *dc-pin*  0) ; Data(high:1)/Command(low:0)
+(defparameter *spi-cs*  0) ; Chip Select (0 or 1)
 
 (defun spi-data-rw (channel values &optional (len (length values)))
   (let ((mp (cffi:foreign-alloc :unsigned-char
@@ -41,35 +42,49 @@
       rval)))
 
 (defun command (values)
-  (digital-write *dc* +low+)
-  (spi-data-rw *cs* values))
+  (digital-write *dc-pin* +low+)
+  (spi-data-rw *spi-cs* values))
 
 (defun data (values)
-  (digital-write *dc* +high+)
-  (spi-data-rw *cs* values))
+  (digital-write *dc-pin* +high+)
+  (spi-data-rw *spi-cs* values))
+
+(defun ssd1306-clear ()
+  (fill *buffer* 0))
+
+(defun ssd1306-display ()
+  (command `(,+ssd1306-column-addr+
+             #X00             ; Column start address (0 = reset)
+             ,(- *width* 1)   ; Column end address
+             ,+ssd1306-page-addr+
+             #X00             ; Page start address (0 = reset)
+             ,(- *pages* 1))) ; Page end address
+  (data *buffer*))
+
+(defun ssd1306-clear-display ()
+  (ssd1306-clear)
+  (ssd1306-display))
 
 (defun ssd1306-init (&key
-                       chip-select
-                       spi-speed
-                       data-command
-                       reset
+                       rst-pin dc-pin
+                       spi-cs spi-speed
                        (vcc-state +ssd1306-switch-cap-vcc+))
-  ;; Set a Chip Select Number and a Data/Command Pin
-  (setf *cs* chip-select
-        *dc* data-command)
+  (setf *rst-pin* rst-pin
+        *dc-pin*  dc-pin
+        *spi-cs*  spi-cs)
 
   ;; Setup GPIO
   (wiringpi-setup-gpio)
-  (pin-mode *dc* +output+)
-  (pin-mode reset +output+)
+  (pin-mode *rst-pin* +output+)
+  (pin-mode *dc-pin*  +output+)
 
   ;; Setup SPI
-  (wiringpi-spi-setup *cs* spi-speed)
+  (wiringpi-spi-setup *spi-cs* spi-speed)
 
   ;; Reset SSD1306
-  (digital-write reset +low+)
+  (digital-write *rst-pin* +low+)
   (delay 50)
-  (digital-write reset +high+)
+  (digital-write *rst-pin* +high+)
 
   ;; Initialize SSD1306
   (command `(,+ssd1306-display-off+
@@ -79,7 +94,7 @@
              #X3F
              ,+ssd1306-set-display-offset+
              #X00 ; no offset
-             ,(logior +ssd1306-set-start-line+ #X00)
+             ,+ssd1306-set-start-line+
              ,+ssd1306-charge-pump+
              ,(if (= vcc-state +ssd1306-external-vcc+) #X10 #X14)
              ,+ssd1306-memory-mode+
@@ -103,19 +118,6 @@
   (when (or (< contrast 0) (> contrast 255))
     (error "Contrast must be a value from 0 to 255"))
   (command `(,+ssd1306-set-contrast+ contrast)))
-
-(defun ssd1306-display ()
-  (command `(,+ssd1306-set-low-column+
-             ,+ssd1306-set-high-column+
-             ,+ssd1306-set-start-line+))
-  (data *buffer*))
-
-(defun ssd1306-clear ()
-  (fill *buffer* 0))
-
-(defun ssd1306-clear-display ()
-  (ssd1306-clear)
-  (ssd1306-display))
 
 (defun ssd1306-draw-pixel (x y &key (color +white+))
   (when (or (< x 0) (> x 127))
