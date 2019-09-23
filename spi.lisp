@@ -25,8 +25,8 @@
 (defparameter *width*  128)
 (defparameter *height* 64)
 (defparameter *pages*  (/ *height* 8))
-(defparameter *buffer* (make-list (* *width* *pages*)
-                                  :initial-element 0))
+(defparameter *buffer-size* (* *width* *pages*))
+(defparameter *buffer* (make-list *buffer-size* :initial-element 0))
 (defparameter *rst-pin* 0) ; Reset
 (defparameter *dc-pin*  0) ; Data(high:1)/Command(low:0)
 (defparameter *spi-cs*  0) ; Chip Select (0 or 1)
@@ -49,9 +49,6 @@
   (digital-write *dc-pin* +high+)
   (spi-data-rw *spi-cs* values))
 
-(defun ssd1306-clear ()
-  (fill *buffer* 0))
-
 (defun ssd1306-display ()
   (command `(,+ssd1306-column-addr+
              #X00             ; Column start address (0 = reset)
@@ -60,6 +57,10 @@
              #X00             ; Page start address (0 = reset)
              ,(- *pages* 1))) ; Page end address
   (data *buffer*))
+
+(defun ssd1306-clear ()
+  (dotimes (n *buffer-size*)
+    (setf (nth n *buffer*) 0)))
 
 (defun ssd1306-clear-display ()
   (ssd1306-clear)
