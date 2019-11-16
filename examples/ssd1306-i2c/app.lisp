@@ -1,7 +1,7 @@
 (uiop:define-package #:ssd1306-i2c/app
   (:use #:cl
-        #:adafruit-lisp-ssd1306/constants  
-        #:ssd1306-i2c/wrapper/wiringpi
+        #:clispi/wiringpi-wrapper
+        #:adafruit-lisp-ssd1306/constants
         #:adafruit-lisp-ssd1306/i2c)
   (:export #:main))
 (in-package #:ssd1306-i2c/app)
